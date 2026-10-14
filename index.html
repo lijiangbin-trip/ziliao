@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>导师专属品牌主页 · 全维深度建站档案库</title>
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+  <!-- 本地前端无损打包与下载库 -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0d0f;
+      --card-bg: #14171c;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #dcff00;
+      --accent-dim: rgba(220, 255, 0, 0.12);
+      --text: #f4f3ef;
+      --muted: #8e939a;
+      --line: rgba(255, 255, 255, 0.08);
+      --wechat-green: #07c160;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif;
+      padding: 24px 0 40px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 以 440×956 手机比例为准的对齐基准：容器统一 440px 并自带左右内边距 */
+    .container {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 0 16px;
+      width: 100%;
+    }
+
+    /* 顶部标语区 */
+    .header { margin-bottom: 26px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      border: 1px solid rgba(220, 255, 0, 0.3);
+    }
+    .header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .header p { color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
+
+    /* 卡片板块 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .card-title {
+      font-size: 1.08rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title span.num {
+      color: var(--accent);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.25rem;
+    }
+    .card-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    /* 证书/爱好分类小标题 */
+    .section-sub-tag {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      margin: 14px 0 8px;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    /* 表单组件 */
+    .form-group { margin-bottom: 18px; }
+    .form-group:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: rgba(244, 243, 239, 0.88);
+    }
+    .required { color: var(--accent); margin-left: 3px; }
+    
+    input[type="text"], textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 16px; /* 防止 iOS Safari 自动放大页面 */
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(220, 255, 0, 0.15);
+    }
+    textarea { resize: vertical; min-height: 75px; }
+    /* 固定窗口大小的资料填写框，禁止缩放 */
+    textarea.fixed-textarea {
+      resize: none;
+      height: 140px;
+      min-height: 140px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    /* 补充输入框微调 */
+    .custom-append-input {
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.25) !important;
+      border: 1px dashed rgba(255, 255, 255, 0.14) !important;
+      font-size: 0.82rem !important;
+    }
+    .custom-append-input:focus {
+      border-style: solid !important;
+      border-color: var(--accent) !important;
+    }
+
+    /* 胶囊单选/多选组：统一网格对齐，保证左右边缘与卡片对齐 */
+    .chip-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+    /* 固定两排布局（每排 6 个）→ 440px 下改为每排 3 个，保证文字完整不溢出 */
+    .chip-container.chip-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .chip-container.chip-grid-6 .chip {
+      text-align: center;
+      padding: 8px 6px;
+      white-space: normal;
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+    }
+    .chip {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      line-height: 1.3;
+      word-break: break-word;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .chip:hover { border-color: rgba(220, 255, 0, 0.4); color: var(--text); }
+    .chip.selected {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 14px -4px rgba(220, 255, 0, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* 原图上传区 */
+    .upload-box {
+      border: 1px dashed rgba(220, 255, 0, 0.35);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+      background: rgba(220, 255, 0, 0.02);
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .upload-box:hover { background: rgba(220, 255, 0, 0.05); }
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-hint {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .upload-hint strong { color: var(--accent); }
+    
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #000;
+    }
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    /* 底部操作栏 */
+    /* 提交按钮改为文档流，置于页脚电话下方，避开手机底部交互栏遮挡 */
+    .bottom-bar {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+    }
+    /* 按钮与 440px 容器左右边缘严格对齐 */
+    .bottom-bar .submit-btn {
+      width: 100%;
+      max-width: 408px;
+    }
+    .submit-btn {
+      width: min(440px, 100%);
+      min-height: 52px;
+      background: var(--accent);
+      color: #111;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.96rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(220, 255, 0, 0.25);
+      transition: transform 0.2s, filter 0.2s;
+    }
+    .submit-btn:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* 微信交付弹窗 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: none;
+      place-items: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .modal.active { display: grid; }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      padding: 24px 20px;
+      width: min(408px, 100%);
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    .modal-title { font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; color: var(--accent); }
+    .modal-box {
+      background: #000;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.74rem;
+      color: #ddd;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 14px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .modal-actions { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+    .action-btn {
+      min-height: 48px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+    }
+    .btn-wechat { background: var(--wechat-green); color: #fff; }
+    .btn-copy { background: var(--accent); color: #111; }
+    .btn-secondary { background: transparent; border: 1px solid var(--card-border); color: var(--muted); }
+
+    /* 页脚开发者署名 */
+    .site-footer {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 36px;
+      padding: 0 0 20px;
+      width: 100%;
+    }
+
+    .studio-credit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 100%;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(26, 30, 36, 0.85), rgba(16, 18, 22, 0.95));
+      border: 1px solid rgba(220, 255, 0, 0.28);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 28px -8px rgba(0, 0, 0, 0.7),
+        0 0 16px -6px rgba(220, 255, 0, 0.25);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      color: rgba(244, 243, 239, 0.7);
+      transition: all 0.3s cubic-bezier(0.2, 0.85, 0.25, 1.2);
+    }
+
+    .studio-credit-badge:hover {
+      border-color: rgba(220, 255, 0, 0.6);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 14px 34px -8px rgba(0, 0, 0, 0.85),
+        0 0 24px -4px rgba(220, 255, 0, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .studio-credit-badge .brand-name {
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.88rem;
+    }
+
+    .studio-credit-badge .credit-divider {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .studio-credit-badge .credit-service {
+      color: rgba(244, 243, 239, 0.75);
+      font-weight: 500;
+    }
+
+    /* 电话：无背景框，仅保留图标 + 号码 */
+    .studio-credit-badge .credit-tel {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 800;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      padding: 0;
+      background: none;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .studio-credit-badge .credit-tel:hover {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(220, 255, 0, 0.8);
+    }
+
+    .studio-credit-badge .credit-tel:active {
+      transform: scale(0.96);
+      opacity: 0.85;
+    }
+
+    .studio-credit-badge .arrow-icon {
+      stroke: currentColor;
+      transition: transform 0.25s ease;
+    }
+
+    .studio-credit-badge .credit-tel:hover .arrow-icon {
+      transform: translate(2px, -2px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="badge">ONBOARDING PRO / 深度全维建站档案</span>
+    <h1>导师品牌网页 · 全维资料收集表</h1>
+  </div>
+
+  <form id="onboardingForm">
+
+    <!-- 模块 0：基本盘与专业赛道 -->
+    <div class="card">
+      <div class="card-title"><span class="num">00</span> 基础档案与赛道方向</div>
+      <div class="card-desc">确定主页的基础骨架与客群对齐</div>
+
+      <div class="form-group">
+        <label>导师称呼 / 品牌名 <span class="required">*</span></label>
+        <input type="text" id="coachName" placeholder="例如：Jennie / 王嘉尔 / Ikun / 李大锤" required>
+      </div>
+
+      <div class="form-group">
+        <label>核心微信号（用于主页客户一键复制/咨询）<span class="required">*</span></label>
+        <input type="text" id="coachWechat" placeholder="客户点击直接复制的微信号" required>
+      </div>
+
+      <div class="form-group">
+        <label>您目前深耕的核心方向（可多选）<span class="required">*</span></label>
+        <div class="chip-container" data-field="tracks">
+          <div class="chip selected">体态矫正 & 疼痛康复</div>
+          <div class="chip">女性专研 & 产后修复</div>
+          <div class="chip">增肌塑形 & 力量进阶</div>
+          <div class="chip">自律神经 & 呼吸恢复</div>
+          <div class="chip">普拉提大器械 & 核心重构</div>
+          <div class="chip">中老年防跌倒 & 介护预防</div>
+          <div class="chip">专项运动表现 & 竞技体能</div>
+          <div class="chip">抗炎饮食 & 代谢重塑</div>
+        </div>
+        <!-- 赛道补充框 -->
+        <input type="text" class="custom-append-input" id="tracks_more" placeholder="✎ 补充其他专研赛道（如有多个用逗号隔开）">
+      </div>
+    </div>
+
+    <!-- 模块 1：主流认证与证书大满贯 -->
+    <div class="card">
+      <div class="card-title"><span class="num">01</span> 专业认证与资质背书（直接点选）</div>
+      <div class="card-desc">勾选您已持有的认证，网页中将以暗黑机能徽章形式高级呈现！</div>
+
+      <span class="section-sub-tag">1. 国际体适能四大认证（金标）</span>
+      <div class="chip-container" data-field="certs">
+        <div class="chip">NASM-CPT 美国国家运动医学会</div>
+        <div class="chip">ACE-CPT 美国运动委员会</div>
+        <div class="chip">NSCA-CSCS 体能训练专家</div>
+        <div class="chip">ACSM 美国运动医学会</div>
+      </div>
+
+      <span class="section-sub-tag">2. 动作筛查、康复与神经稳定</span>
+      <div class="chip-container" data-field="certs">
+        <div class="chip">FMS 功能性动作筛查</div>
+        <div class="chip">SFMA 选择性功能动作评估</div>
+        <div class="chip">DNS 动态神经肌肉稳定技术</div>
+        <div class="chip">PRI 姿势恢复技术</div>
+        <div class="chip">Maitland / 关节松动认证</div>
+        <div class="chip">Dynamic Tape 动态贴扎认证</div>
+        <div class="chip">国家级康复治疗师/物理治疗背景</div>
+        <div class="chip">Redcord 悬吊训练认证</div>
+      </div>
+
+      <span class="section-sub-tag">3. 普拉提、女性与产后修复</span>
+      <div class="chip-container" data-field="certs">
+        <div class="chip">Polestar Pilates 北极星普拉提</div>
+        <div class="chip">BASI Pilates 认证</div>
+        <div class="chip">STOTT PILATES 斯道特</div>
+        <div class="chip">产后盆底肌/腹直肌精细修复认证</div>
+        <div class="chip">孕产期体适能特训认证</div>
+        <div class="chip">女性生理周期训练认证</div>
+      </div>
+
+      <span class="section-sub-tag">4. 营养代谢与恢复管理</span>
+      <div class="chip-container" data-field="certs">
+        <div class="chip">ISSN 国际运动营养学会认证</div>
+        <div class="chip">国家注册营养师 / 公共营养师</div>
+        <div class="chip">EXOS 运动表现认证</div>
+        <div class="chip">呼吸重塑 / 睡眠恢复管理体系</div>
+      </div>
+
+      <div class="form-group" style="margin-top: 14px;">
+        <label>补充其他证书 / 毕业院校 / 师承流派（选填）</label>
+        <textarea id="certsMore" placeholder="如：毕业于北京体育大学运动人体科学专业、参加过XX大师工作坊、拥有红十字急救员证等..."></textarea>
+      </div>
+    </div>
+
+    <!-- 模块 2：荣誉战绩与高光经历 -->
+    <div class="card">
+      <div class="card-title"><span class="num">02</span> 赛场荣誉与高光背书</div>
+      <div class="card-desc">任何比赛名次、合作品牌、行业背书，都是拉开差距的关键！</div>
+
+      <div class="form-group">
+        <label>赛场获奖 / 行业殊荣（可按年份多条列出）</label>
+        <textarea id="honors" class="fixed-textarea" placeholder="例如：
+· 2024 IFBB/奥赛中国区健体公开组 前三
+· 2023 全国健身锦标赛 体育模特冠军
+· 2022 某连锁品牌全国年度十佳五星金牌私教
+· 某知名运动品牌/补剂品牌签约推广大使"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>特殊服务对象 / 标杆经历（选填）</label>
+        <input type="text" id="specialCases" placeholder="例如：常年担任知名企业高管、艺人产后修复专属教练 / 执教跨国学员等">
+      </div>
+    </div>
+
+    <!-- 模块 3：高清人像原图上传 -->
+    <div class="card">
+      <div class="card-title"><span class="num">03</span> 定制化人像原图提交（专业生图原图）</div>
+      <div class="card-desc">用于彻底去除 AI 塑料虚假感。请上传<strong>手机后置原相机拍摄、自然光、无美颜滤镜</strong>的清晰原图。</div>
+
+      <!-- 面部特写 -->
+      <div class="form-group">
+        <label>A. 面部清晰特写（需 3~5 张，正脸/微侧脸/专注自然微笑）<span class="required">*</span></label>
+        <div class="upload-box">
+          <input type="file" id="facePhotos" accept="image/*" multiple>
+          <div>📸 点击上传面部特写照片</div>
+          <div class="upload-hint">支持多选 · 捕捉面部自然肌理与眼神（勿美颜）</div>
+        </div>
+        <div class="preview-grid" id="facePreview"></div>
+      </div>
+
+      <!-- 全身/半身体态 -->
+      <div class="form-group">
+        <label>B. 全身与自然体态照（需 2~3 张，合身衣物、正面/侧面站姿）<span class="required">*</span></label>
+        <div class="upload-box">
+          <input type="file" id="bodyPhotos" accept="image/*" multiple>
+          <div>🧍 点击上传全身/半身体态照片</div>
+          <div class="upload-hint">支持多选 · 展示身姿骨架与真实体态</div>
+        </div>
+        <div class="preview-grid" id="bodyPreview"></div>
+      </div>
+
+      <!-- 工作/生活抓拍 -->
+      <div class="form-group">
+        <label>C. 工作/带教/生活抓拍（选填，1~3 张）</label>
+        <div class="upload-box">
+          <input type="file" id="lifePhotos" accept="image/*" multiple>
+          <div>☕ 点击上传工作或日常真实抓拍</div>
+          <div class="upload-hint">如：器械旁指导、户外运动、喝咖啡日常等</div>
+        </div>
+        <div class="preview-grid" id="lifePreview"></div>
+      </div>
+    </div>
+
+    <!-- 模块 4：视觉风格偏好与设计取向 -->
+    <div class="card">
+      <div class="card-title"><span class="num">04</span> 您希望网页呈现的设计风格</div>
+      <div class="card-desc">让网页从配色到排版，完全契合您的个人气质与审美！</div>
+
+      <div class="form-group">
+        <label>视觉基调偏好（单选/多选）<span class="required">*</span></label>
+        <div class="chip-container" data-field="visualStyle">
+          <div class="chip selected">暗黑机能风（纯黑深邃 + 荧光绿点缀）</div>
+          <div class="chip">黑金奢华感（冷黑底 + 哑光流金高级感）</div>
+          <div class="chip">大地治愈感（柔和灰咖 + 苔藓绿身心调）</div>
+          <div class="chip">北欧极简风（冷灰高亮 + 留白通透感）</div>
+          <div class="chip">日系原木质感（温润自然 + 禅意静定）</div>
+          <div class="chip">赛博未来感（霓虹冷光 + 科技数据流）</div>
+          <div class="chip">莫兰迪高级灰（低饱和柔雾 + 静谧质感）</div>
+          <div class="chip">复古胶片风（暖调颗粒 + 怀旧叙事感）</div>
+        </div>
+        <!-- 风格补充框 -->
+        <input type="text" class="custom-append-input" id="visualStyle_more" placeholder="✎ 补充其他视觉/配色想法（例如：喜欢莫兰迪灰调、想要更偏科技感等）">
+      </div>
+
+      <div class="form-group">
+        <label>期望给来访客户的第一印象标签</label>
+        <div class="chip-container chip-grid-6" data-field="impressionTags">
+          <div class="chip selected">严谨硬核</div>
+          <div class="chip selected">国际范</div>
+          <div class="chip">温暖治愈</div>
+          <div class="chip">精英克制</div>
+          <div class="chip">松弛自洽</div>
+          <div class="chip">极度专业</div>
+          <div class="chip">亲和温柔</div>
+          <div class="chip">高燃活力</div>
+          <div class="chip">沉稳可靠</div>
+          <div class="chip">时尚潮流</div>
+          <div class="chip">科学理性</div>
+          <div class="chip">活力阳光</div>
+        </div>
+        <!-- 印象标签补充框 -->
+        <input type="text" class="custom-append-input" id="impressionTags_more" placeholder="✎ 补充其他印象标签">
+      </div>
+    </div>
+
+    <!-- 模块 5：核心口号理念与 Hero 封面 -->
+    <div class="card">
+      <div class="card-title"><span class="num">05</span> 核心口号与交付步骤</div>
+      <div class="card-desc">首屏一句话直击人心，体现与众不同的哲学</div>
+
+      <div class="form-group">
+        <label>主打核心口号（Slogan）<span class="required">*</span></label>
+        <input type="text" id="slogan" placeholder="例如：身体是一座精密的建筑 / 不对抗疼痛，让骨骼重回中立位" required>
+      </div>
+
+      <div class="form-group">
+        <label>一句话专业副标题 <span class="required">*</span></label>
+        <input type="text" id="subSlogan" placeholder="例如：生物力学 × 功能营养学。迈向没有代偿、精炼到细节的身体。" required>
+      </div>
+
+      <div class="form-group">
+        <label>核心交付 4 步法（简短短语）</label>
+        <input type="text" id="step1" placeholder="步骤 1：如 动作力线筛查 / 深度状态问诊" style="margin-bottom: 6px;">
+        <input type="text" id="step2" placeholder="步骤 2：如 神经稳定重置 / 筋膜张力平衡" style="margin-bottom: 6px;">
+        <input type="text" id="step3" placeholder="步骤 3：如 渐进抗阻强化 / 核心深层激活" style="margin-bottom: 6px;">
+        <input type="text" id="step4" placeholder="步骤 4：如 动作自主迁移 / 荷尔蒙代谢维持">
+      </div>
+    </div>
+
+    <!-- 模块 6：硬核数据看板 -->
+    <div class="card">
+      <div class="card-title"><span class="num">06</span> 硬核数据看板（2×2 矩阵）</div>
+      <div class="card-desc">用数字构建不可撼动的信任基石</div>
+
+      <div class="form-group">
+        <label>数据 1（累积执教时长）</label>
+        <input type="text" id="stat1" placeholder="例如：3500+ HOURS / 累积一对一私教执教">
+      </div>
+      <div class="form-group">
+        <label>数据 2（改善案例量）</label>
+        <input type="text" id="stat2" placeholder="例如：120+ CASES / 体态矫正与减脂蜕变个案">
+      </div>
+      <div class="form-group">
+        <label>数据 3（复训留存/好评率）</label>
+        <input type="text" id="stat3" placeholder="例如：92% RETENTION / 学员长程复训与信赖">
+      </div>
+      <div class="form-group">
+        <label>数据 4（特色服务/排课限流）</label>
+        <input type="text" id="stat4" placeholder="例如：每月限流 3 名 / 维持高品质专注陪伴">
+      </div>
+    </div>
+
+    <!-- 模块 7：深度爱好与生活方式全景 -->
+    <div class="card">
+      <div class="card-title"><span class="num">07</span> 个人魅力与生活全景（打破死板冰冷感）</div>
+      <div class="card-desc">全维收集您的兴趣爱好、生活格调与身心哲学，塑造立体有魅力的导师形象！</div>
+
+      <span class="section-sub-tag">1. 动态与户外运动</span>
+      <div class="chip-container chip-grid-6" data-field="hobbies_action">
+        <div class="chip">陆地冲浪板 / 碗池滑板</div>
+        <div class="chip">摩托骑行 / 公路自行车</div>
+        <div class="chip">尾波冲浪 / 潜水自由潜</div>
+        <div class="chip">单双板滑雪</div>
+        <div class="chip">户外越野跑 / 徒步探险</div>
+        <div class="chip">拳击 / 搏击格斗</div>
+        <div class="chip">室内攀岩 / 抱石</div>
+        <div class="chip">网球 / 羽毛球 / 飞盘</div>
+        <div class="chip">高尔夫 / 马术</div>
+        <div class="chip">帆船 / 桨板 SUP</div>
+        <div class="chip">滑翔伞 / 跳伞</div>
+        <div class="chip">山地骑行 / 越野摩托</div>
+        <div class="chip">铁人三项 / 马拉松</div>
+        <div class="chip">篮球 / 足球</div>
+        <div class="chip">游泳 / 公开水域</div>
+        <div class="chip">击剑 / 射箭</div>
+        <div class="chip">滑板 / 长板刷街</div>
+        <div class="chip">飞盘 / 腰旗橄榄球</div>
+      </div>
+
+      <span class="section-sub-tag">2. 身心调适与慢调生活</span>
+      <div class="chip-container chip-grid-6" data-field="hobbies_mind">
+        <div class="chip">传统站桩 / 传统养生</div>
+        <div class="chip">正念冥想 / 颂钵疗愈</div>
+        <div class="chip">自律手冲咖啡 / 精品浅烘</div>
+        <div class="chip">传统工夫茶 / 禅茶生活</div>
+        <div class="chip">瑜伽修习 / 阴瑜伽</div>
+        <div class="chip">自然露营 / 围炉夜话</div>
+        <div class="chip">深度阅读 / 人体科学哲学</div>
+        <div class="chip">温泉康养 / 桑拿冰水浴</div>
+        <div class="chip">芳香精油 / 香道</div>
+        <div class="chip">书法抄经 / 静心手作</div>
+        <div class="chip">太极 / 八段锦</div>
+        <div class="chip">森林浴 / 自然疗愈</div>
+        <div class="chip">呼吸训练 / 冷热交替</div>
+        <div class="chip">素食料理 / 慢食主义</div>
+        <div class="chip">园艺种植 / 花草养护</div>
+        <div class="chip">冥想旅行 / 静修营</div>
+        <div class="chip">睡眠管理 / 昼夜节律</div>
+        <div class="chip">中医调理 / 经络养生</div>
+      </div>
+
+      <span class="section-sub-tag">3. 艺术审美与潮流爱好</span>
+      <div class="chip-container chip-grid-6" data-field="hobbies_art">
+        <div class="chip">复古胶片摄影 / 街拍记录</div>
+        <div class="chip">雷鬼 / 爵士 / 嘻哈音乐</div>
+        <div class="chip">黑胶唱片收藏</div>
+        <div class="chip">潮流穿搭 / 街头文化</div>
+        <div class="chip">硬核电子竞技 / 主机游戏</div>
+        <div class="chip">萌宠陪伴（吸猫/养狗）</div>
+        <div class="chip">健康轻食烹饪 / 烘焙</div>
+        <div class="chip">自驾旅行 / 环游世界</div>
+        <div class="chip">艺术展 / 美术馆巡礼</div>
+        <div class="chip">乐器演奏 / 音乐创作</div>
+        <div class="chip">手作木工 / 皮具制作</div>
+        <div class="chip">调酒 / 威士忌品鉴</div>
+        <div class="chip">改装车 / 机车文化</div>
+        <div class="chip">球鞋收藏 / 潮玩手办</div>
+        <div class="chip">电影 / 纪录片鉴赏</div>
+        <div class="chip">陶艺 / 绘画创作</div>
+        <div class="chip">时尚买手 / 古着穿搭</div>
+        <div class="chip">旅行摄影 / 城市漫游</div>
+      </div>
+
+      <!-- 爱好自由输入框 -->
+      <div class="form-group" style="margin-top: 14px;">
+        <label>✎ 补充您的其他独特爱好 / 专长标签（选填）</label>
+        <textarea id="hobbies_more" placeholder="例如：弹吉他、看艺术展、喜欢调酒、改装车、手作木工、打高尔夫等..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>关于饮食的哲学（一句话）</label>
+        <textarea id="dietPhilosophy" placeholder="例如：生活不是卡路里的精密计算，告别水煮菜焦虑，用干净的天然抗炎食材唤醒身体的代谢本能。"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>关于休息/睡眠/自律的看法（一句话）</label>
+        <textarea id="restPhilosophy" placeholder="例如：紧绷不是自律，学会合上眼在呼吸中让神经系统降噪，力量才会在深定中重新生长。"></textarea>
+      </div>
+    </div>
+
+    <!-- 模块 8：客群专轨与方案定价 -->
+    <div class="card">
+      <div class="card-title"><span class="num">08</span> 客群专轨与课程定价</div>
+      <div class="card-desc">清晰透明的专业投入梯度</div>
+
+      <div class="form-group">
+        <label>主要服务的 3 类人群专轨</label>
+        <input type="text" id="targetGroups" placeholder="例如：久坐骨盆前倾白领 / 产后假胯宽妈妈 / 力量线条进阶者">
+      </div>
+
+      <div class="form-group">
+        <label>单次体验/诊断方案</label>
+        <input type="text" id="priceTrial" placeholder="例如：¥500 / 75分钟（含体态力线拍摄+动态筛查+针对性激活）">
+      </div>
+
+      <div class="form-group">
+        <label>核心蜕变套餐（主推）</label>
+        <input type="text" id="priceMain" placeholder="例如：¥600/节（24课时包 · 每周2-3次 · 含饮食打卡）">
+      </div>
+
+      <div class="form-group">
+        <label>长程身心维护方案</label>
+        <input type="text" id="priceLong" placeholder="例如：¥550/节（48课时包 · 8个月长效调理）">
+      </div>
+    </div>
+
+  </form>
+
+  <!-- ================= 独立开发者署名 ================= -->
+  <footer class="site-footer">
+    <div class="studio-credit-badge">
+      <span class="credit-brand">Designed & Developed by <strong class="brand-name">BIN.STUDIO</strong></span>
+      <span class="credit-divider">·</span>
+      <span class="credit-service">设计/开发/多维</span>
+      <span class="credit-divider">·</span>
+      <a class="credit-tel" href="tel:19960809899">
+        <svg class="tel-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        <span>199-6080-9899</span>
+      </a>
+    </div>
+  </footer>
+
+  <!-- 提交按钮：置于电话署名下方，避开手机底部交互栏 -->
+  <div class="bottom-bar">
+    <button class="submit-btn" id="generateZipBtn" type="button">
+      <span>📦 打包并发送全套建站物料至微信</span>
+    </button>
+  </div>
+</div>
+
+<!-- 弹窗：微信交付 -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <div class="modal-title">✓ 专属全维物料包已打包完成！</div>
+    <p style="font-size: 0.84rem; color: var(--text); margin-bottom: 8px;">
+      已为您在本地完整打包了全部文字、证书认证、深度爱好与<strong>未经压缩的高清原图</strong>。
+    </p>
+    <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-bottom: 12px;">
+      📱 若系统未自动弹出分享窗口，点击下方绿色按钮：系统将自动复制开发者微信号并为您唤醒微信客户端，进入聊天框发送刚刚保存的压缩包即可！
+    </p>
+    
+    <div class="modal-box" id="modalText"></div>
+
+    <div class="modal-actions">
+      <button class="action-btn btn-wechat" id="wakeWechatBtn">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.032zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>
+        <span>复制开发者微信并打开微信</span>
+      </button>
+      <button class="action-btn btn-copy" id="copyTextBtn">一键复制纯文本档案</button>
+      <button class="action-btn btn-secondary" id="closeBtn">返回修改</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // 配置项：接收物料的开发者微信号
+  // ==========================================
+  const DEVELOPER_WECHAT_ID = "YOUR_WECHAT_ID"; // 请替换为您接收文件的微信号
+
+  // 1. 胶囊多选切换
+  document.querySelectorAll('.chip-container .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('selected');
+    });
+  });
+
+  // 2. 图像暂存队列
+  const imageCollections = {
+    face: [],
+    body: [],
+    life: []
+  };
+
+  function setupImageUpload(inputId, previewId, key) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    input.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        imageCollections[key].push(file);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const div = document.createElement('div');
+          div.className = 'preview-item';
+          div.innerHTML = `
+            <img src="${event.target.result}" alt="preview">
+            <button class="preview-remove" type="button">&times;</button>
+          `;
+          div.querySelector('.preview-remove').addEventListener('click', () => {
+            const idx = imageCollections[key].indexOf(file);
+            if (idx > -1) imageCollections[key].splice(idx, 1);
+            div.remove();
+          });
+          preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  setupImageUpload('facePhotos', 'facePreview', 'face');
+  setupImageUpload('bodyPhotos', 'bodyPreview', 'body');
+  setupImageUpload('lifePhotos', 'lifePreview', 'life');
+
+  // 通用剪贴板写入
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve) => {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.top = '-9999px';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(area);
+      resolve(ok);
+    });
+  }
+
+  // 读取已选胶囊列表并合并自定义补充输入
+  function getSelectedChipsWithCustom(fieldName, customInputId) {
+    const container = document.querySelector(`[data-field="${fieldName}"]`);
+    let result = [];
+    if (container) {
+      result = Array.from(container.querySelectorAll('.chip.selected')).map(c => c.textContent.trim());
+    }
+    if (customInputId) {
+      const customVal = document.getElementById(customInputId)?.value.trim();
+      if (customVal) result.push(`【自定义补充: ${customVal}】`);
+    }
+    return result.length ? result.join('、') : '无';
+  }
+
+  // 3. 打包与微信分享处理
+  const generateZipBtn = document.getElementById('generateZipBtn');
+  const resultModal = document.getElementById('resultModal');
+  const modalText = document.getElementById('modalText');
+  const copyTextBtn = document.getElementById('copyTextBtn');
+  const wakeWechatBtn = document.getElementById('wakeWechatBtn');
+  const closeBtn = document.getElementById('closeBtn');
+
+  generateZipBtn.addEventListener('click', async () => {
+    const coachName = document.getElementById('coachName').value.trim() || '未署名';
+    const coachWechat = document.getElementById('coachWechat').value.trim() || '未填写';
+    
+    if (coachName === '未署名') {
+      alert('请填写导师称呼/品牌名');
+      document.getElementById('coachName').focus();
+      return;
+    }
+
+    const tracks = getSelectedChipsWithCustom('tracks', 'tracks_more');
+    const certs = getSelectedChipsWithCustom('certs', null);
+    const certsMore = document.getElementById('certsMore').value.trim() || '无补充';
+    const honors = document.getElementById('honors').value.trim() || '暂未填写赛场荣誉';
+    const specialCases = document.getElementById('specialCases').value.trim() || '常规执教';
+    const visualStyle = getSelectedChipsWithCustom('visualStyle', 'visualStyle_more');
+    const impressionTags = getSelectedChipsWithCustom('impressionTags', 'impressionTags_more');
+
+    const slogan = document.getElementById('slogan').value.trim() || '身体是一座精密的建筑';
+    const subSlogan = document.getElementById('subSlogan').value.trim() || '功能科学 × 身心调养';
+    const steps = [
+      document.getElementById('step1').value.trim(),
+      document.getElementById('step2').value.trim(),
+      document.getElementById('step3').value.trim(),
+      document.getElementById('step4').value.trim()
+    ].filter(Boolean).join(' → ') || '评估 → 重置 → 激活 → 迁移';
+
+    const stats = [
+      document.getElementById('stat1').value.trim(),
+      document.getElementById('stat2').value.trim(),
+      document.getElementById('stat3').value.trim(),
+      document.getElementById('stat4').value.trim()
+    ].filter(Boolean).join(' | ') || '资深执教';
+
+    // 组合三类深度爱好 + 补充爱好
+    const hobbiesAction = getSelectedChipsWithCustom('hobbies_action', null);
+    const hobbiesMind = getSelectedChipsWithCustom('hobbies_mind', null);
+    const hobbiesArt = getSelectedChipsWithCustom('hobbies_art', null);
+    const hobbiesMore = document.getElementById('hobbies_more').value.trim() || '无额外补充';
+
+    const diet = document.getElementById('dietPhilosophy').value.trim() || '顺应自然代谢';
+    const rest = document.getElementById('restPhilosophy').value.trim() || '在静定中降噪恢复';
+
+    const targetGroups = document.getElementById('targetGroups').value.trim() || '全生命周期人群';
+    const prices = `单次体验: ${document.getElementById('priceTrial').value.trim() || '待定'} / 蜕变套餐: ${document.getElementById('priceMain').value.trim() || '待定'} / 长程维护: ${document.getElementById('priceLong').value.trim() || '待定'}`;
+
+    const summaryText = `
+====================================================
+📋【${coachName} 导师专属全维建站档案】
+====================================================
+【基础档案】
+· 导师署名：${coachName}
+· 直达微信：${coachWechat}
+· 专研赛道：${tracks}
+
+【专业认证与资质库】
+· 已持金标认证：${certs}
+· 补充资历/学派：${certsMore}
+
+【赛场荣誉与高光】
+· 赛场与行业荣誉：
+${honors}
+· 标杆/私密执教经历：${specialCases}
+
+【网页审美与风格倾向】
+· 视觉基调偏好：${visualStyle}
+· 客户第一印象：${impressionTags}
+
+【首屏气场与核心交付】
+· 核心 Slogan：${slogan}
+· 专业副标题：${subSlogan}
+· 核心交付 4 步法：${steps}
+
+【2×2 硬核数据矩阵】
+· ${stats}
+
+【个人魅力与深度生活全景】
+· 动态与户外运动：${hobbiesAction}
+· 身心调适与慢调：${hobbiesMind}
+· 艺术审美与潮流：${hobbiesArt}
+· 更多独特专长爱好：${hobbiesMore}
+· 饮食哲学：${diet}
+· 恢复理念：${rest}
+
+【客群专轨与收费】
+· 客群分类：${targetGroups}
+· 方案价格：${prices}
+
+【已就绪高清素材】
+· 面部特写照片：${imageCollections.face.length} 张
+· 全身半身体态：${imageCollections.body.length} 张
+· 工作日常抓拍：${imageCollections.life.length} 张
+====================================================
+`.trim();
+
+    generateZipBtn.disabled = true;
+    generateZipBtn.innerHTML = '<span>⏳ 正在无损打包全套资料...</span>';
+
+    try {
+      const zip = new JSZip();
+      zip.file('00_导师全维建站档案.txt', summaryText);
+
+      // 分文件夹归类照片
+      const faceFolder = zip.folder('01_面部清晰特写原图');
+      imageCollections.face.forEach((file, index) => {
+        const ext = file.name.split('.').pop() || 'jpg';
+        faceFolder.file(`face_${String(index + 1).padStart(2, '0')}.${ext}`, file);
+      });
+
+      const bodyFolder = zip.folder('02_全身半身体态原图');
+      imageCollections.body.forEach((file, index) => {
+        const ext = file.name.split('.').pop() || 'jpg';
+        bodyFolder.file(`body_${String(index + 1).padStart(2, '0')}.${ext}`, file);
+      });
+
+      const lifeFolder = zip.folder('03_生活与工作抓拍');
+      imageCollections.life.forEach((file, index) => {
+        const ext = file.name.split('.').pop() || 'jpg';
+        lifeFolder.file(`life_${String(index + 1).padStart(2, '0')}.${ext}`, file);
+      });
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const safeCoachName = coachName.replace(/[\/\\:*?"<>|]/g, '_');
+      const zipFileName = `【${safeCoachName}】全维建站物料包.zip`;
+      const zipFile = new File([content], zipFileName, { type: 'application/zip' });
+
+      // 路径 1：支持 Web Share API 直接拉起微信分享
+      if (navigator.canShare && navigator.canShare({ files: [zipFile] })) {
+        generateZipBtn.innerHTML = '<span>📲 正在调起微信分享...</span>';
+        try {
+          await navigator.share({
+            files: [zipFile],
+            title: zipFileName,
+            text: `这是【${coachName}】导师的专属建站物料包与高清原图，请查收！`
+          });
+          generateZipBtn.innerHTML = '<span>✓ 已成功调起分享</span>';
+          return;
+        } catch (shareErr) {
+          console.log('转入本地保存兜底');
+        }
+      }
+
+      // 路径 2：兜底下载并提供微信一键唤起
+      saveAs(content, zipFileName);
+      copyTextToClipboard(DEVELOPER_WECHAT_ID);
+
+      modalText.textContent = summaryText;
+      resultModal.classList.add('active');
+    } catch (err) {
+      alert('打包发生异常：' + err.message);
+    } finally {
+      generateZipBtn.disabled = false;
+      generateZipBtn.innerHTML = '<span>📦 打包并发送全套建站物料至微信</span>';
+    }
+  });
+
+  // 微信一键唤醒动作
+  wakeWechatBtn.addEventListener('click', () => {
+    copyTextToClipboard(DEVELOPER_WECHAT_ID).then(() => {
+      alert(`微信号【${DEVELOPER_WECHAT_ID}】已复制！\n正在为您打开微信，直接在聊天框点击文件即可发送物料包。`);
+      try {
+        window.location.href = "weixin://";
+      } catch (e) {}
+    });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    resultModal.classList.remove('active');
+  });
+
+  copyTextBtn.addEventListener('click', () => {
+    copyTextToClipboard(modalText.textContent).then(() => {
+      copyTextBtn.textContent = '✓ 文本已复制到剪贴板！';
+      setTimeout(() => {
+        copyTextBtn.textContent = '一键复制纯文本档案';
+      }, 2500);
+    });
+  });
+</script>
+
+</body>
+</html>
